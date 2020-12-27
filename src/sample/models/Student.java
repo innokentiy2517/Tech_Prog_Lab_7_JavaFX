@@ -4,6 +4,8 @@ public class Student extends Human{
     private double scholarship;
     private int course;
 
+    public Student(){}
+
     public Student(String name, int age, double scholarship, int course) {
         super(name, age);
         this.scholarship = scholarship;

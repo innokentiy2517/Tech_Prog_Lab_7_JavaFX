@@ -10,7 +10,6 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
 <AnchorPane prefHeight="200.0" prefWidth="330.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.gui.HumanFormController">
    <children>
       <GridPane layoutX="14.0" layoutY="14.0" prefWidth="300.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
@@ -25,6 +24,8 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label text="Name" GridPane.rowIndex="1" />
@@ -36,12 +37,16 @@
             <Label fx:id="courseLabel" text="Course" GridPane.rowIndex="4" />
             <ChoiceBox fx:id="humanTypeCmb" prefWidth="300.0" GridPane.columnSpan="2" />
             <ChoiceBox fx:id="courseCmb" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Button mnemonicParsing="false" onAction="#onSaveClick" text="Save" GridPane.rowIndex="5" />
-            <Button mnemonicParsing="false" onAction="#onCancelClick" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
+            <Button mnemonicParsing="false" onAction="#onSaveClick" text="Save" GridPane.rowIndex="7" />
+            <Button mnemonicParsing="false" onAction="#onCancelClick" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
             </Button>
+            <Label fx:id="isOnVacationLabel" text="On vacation" GridPane.rowIndex="6" />
+            <Label fx:id="educationLabel" text="Education" GridPane.rowIndex="5" />
+            <ChoiceBox fx:id="isOnVacationCmb" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <ChoiceBox fx:id="educationCmb" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
          </children>
       </GridPane>
    </children>

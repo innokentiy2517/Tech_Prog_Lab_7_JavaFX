@@ -1,0 +1,43 @@
+[ {
+  "@class" : "sample.models.Student",
+  "name" : "Ken",
+  "age" : 21,
+  "id" : 1,
+  "scholarship" : 16000.0,
+  "course" : 3,
+  "money" : 16000.0
+}, {
+  "@class" : "sample.models.Student",
+  "name" : "Alex",
+  "age" : 20,
+  "id" : 2,
+  "scholarship" : 0.0,
+  "course" : 4,
+  "money" : 0.0
+}, {
+  "@class" : "sample.models.Student",
+  "name" : "Viva",
+  "age" : 19,
+  "id" : 3,
+  "scholarship" : 3700.0,
+  "course" : 2,
+  "money" : 3700.0
+}, {
+  "@class" : "sample.models.Employee",
+  "name" : "Eugene",
+  "age" : 21,
+  "id" : 4,
+  "salary" : 15000.0,
+  "education" : "University",
+  "money" : 15000.0
+}, {
+  "@class" : "sample.models.Teacher",
+  "name" : "Michael",
+  "age" : 25,
+  "id" : 5,
+  "salary" : 30000.0,
+  "education" : "University",
+  "isOnVacation" : false,
+  "stringIsOnVacation" : "No",
+  "money" : 30000.0
+} ]

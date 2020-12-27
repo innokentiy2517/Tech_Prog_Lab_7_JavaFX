@@ -12,10 +12,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import sample.models.Employee;
-import sample.models.Human;
-import sample.models.Student;
+import javafx.util.StringConverter;
+import sample.models.*;
 
+import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
@@ -28,6 +28,19 @@ public class MainFormController implements Initializable {
     public Label moneyLabelData;
     public Label courseLabel;
     public Label courseLabelData;
+    public Label educationLabel;
+    public Label isOnVacationLabel;
+    public Label educationLabelData;
+    public Label isOnVacationLabelData;
+    public ChoiceBox cmbHumanType;
+
+    ObservableList<Class<? extends Human>> humanTypes = FXCollections.observableArrayList(
+            Human.class,
+            Employee.class,
+            Student.class,
+            Teacher.class
+    );
+
     @FXML
     private TableView<Human> mainTable;
     @FXML
@@ -35,19 +48,39 @@ public class MainFormController implements Initializable {
     @FXML
     private TableColumn<Human,Integer> ageColumn;
 
-    ObservableList<Human> humanList = FXCollections.observableArrayList();
+    HumanModel humanModel = new HumanModel();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        humanList.add(new Student("Ken", 21, 16000, 3));
-        humanList.add(new Student("Alex", 20, 0, 4));
-        humanList.add(new Student("Viva", 19, 3700, 2));
-        humanList.add(new Employee("Eugene",21,15000));
+        cmbHumanType.setItems(humanTypes);
+        cmbHumanType.getSelectionModel().select(0);
+        cmbHumanType.setConverter(new StringConverter<Class>(){
+            @Override
+            public String toString(Class object){
+                if(Human.class.equals(object)){
+                    return "Все";
+                } else if (Employee.class.equals(object)){
+                    return "Employee";
+                } else if (Student.class.equals(object)){
+                    return "Student";
+                }else if (Teacher.class.equals(object)){
+                    return "Teacher";
+                }
+                return null;
+            }
+            @Override
+            public Class fromString(String string){
+                return null;
+            }
+        });
+        cmbHumanType.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {this.humanModel.setHumanFilter((Class<? extends Human>) newValue);}));
+        humanModel.addDataChangedListener(humans -> {
+            mainTable.setItems(FXCollections.observableArrayList(humans));
+        });
 
-        mainTable.setItems(humanList);
-
-        nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        ageColumn.setCellValueFactory(cellData -> cellData.getValue().ageProperty().asObject());
+        humanModel.load();
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        ageColumn.setCellValueFactory(new PropertyValueFactory<>("age"));
 
         showHumanDetails(null);
 
@@ -67,6 +100,10 @@ public class MainFormController implements Initializable {
                 courseLabel.setVisible(true);
                 courseLabelData.setVisible(true);
                 courseLabelData.setText(Integer.toString(stud.getCourse()));
+                educationLabelData.setVisible(false);
+                educationLabel.setVisible(false);
+                isOnVacationLabelData.setVisible(false);
+                isOnVacationLabel.setVisible(false);
             }
             if (human instanceof Employee){
                Employee employee = (Employee) human;
@@ -78,6 +115,28 @@ public class MainFormController implements Initializable {
                moneyLabelData.setText(Double.toString(employee.getMoney()));
                courseLabel.setVisible(false);
                courseLabelData.setVisible(false);
+               educationLabel.setVisible(true);
+               educationLabelData.setVisible(true);
+               educationLabelData.setText(employee.getEducation().toString());
+               isOnVacationLabelData.setVisible(false);
+               isOnVacationLabel.setVisible(false);
+            }
+            if (human instanceof Teacher){
+                Teacher teacher = (Teacher) human;
+                nameLabelData.setText(teacher.getName());
+                ageLabelData.setText(Integer.toString(teacher.getAge()));
+                moneyLabel.setVisible(true);
+                moneyLabel.setText("Salary");
+                moneyLabelData.setVisible(true);
+                moneyLabelData.setText(Double.toString(teacher.getMoney()));
+                courseLabel.setVisible(false);
+                courseLabelData.setVisible(false);
+                educationLabel.setVisible(true);
+                educationLabelData.setVisible(true);
+                educationLabelData.setText(teacher.getEducation().toString());
+                isOnVacationLabel.setVisible(true);
+                isOnVacationLabelData.setVisible(true);
+                isOnVacationLabelData.setText(String.valueOf(teacher.getIsOnVacation()));
             }
         }
         else {
@@ -87,6 +146,10 @@ public class MainFormController implements Initializable {
             moneyLabelData.setVisible(false);
             courseLabel.setVisible(false);
             courseLabelData.setVisible(false);
+            educationLabel.setVisible(false);
+            educationLabelData.setVisible(false);
+            isOnVacationLabel.setVisible(false);
+            isOnVacationLabelData.setVisible(false);
         }
     }
 
@@ -99,13 +162,10 @@ public class MainFormController implements Initializable {
         stage.setScene(new Scene(root));
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(this.mainTable.getScene().getWindow());
-        stage.showAndWait();
 
         HumanFormController controller = loader.getController();
-        if (controller.getModalResult()){
-            Human newHuman = controller.getHuman();
-            this.humanList.add(newHuman);
-        }
+        controller.humanModel = humanModel;
+        stage.showAndWait();
     }
 
     public void onEditClick(ActionEvent actionEvent) throws IOException {
@@ -120,32 +180,27 @@ public class MainFormController implements Initializable {
 
         HumanFormController controller = loader.getController();
         controller.setHuman((Human) this.mainTable.getSelectionModel().getSelectedItem());
-
+        controller.humanModel = humanModel;
         stage.showAndWait();
-
-        if (controller.getModalResult()){
-            int index = this.mainTable.getSelectionModel().getSelectedIndex();
-            this.mainTable.getItems().set(index, controller.getHuman());
-        }
     }
 
     public void onDeleteClick(ActionEvent actionEvent) {
-        int index = mainTable.getSelectionModel().getSelectedIndex();
+        Human human = (Human)  this.mainTable.getSelectionModel().getSelectedItem();
 
-        if (index >= 0){
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmation");
-            alert.setHeaderText(String.format("Are you sure you want to delete %s?", humanList.get(index).getName()));
-            Optional<ButtonType> option = alert.showAndWait();
-            if (option.get() == ButtonType.OK){
-                this.mainTable.getItems().remove(index);
-            }
-        }else {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Selection error");
-            alert.setHeaderText("No human selected");
-            alert.setContentText("Please choose a human to delete");
-            alert.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText(String.format("Are you sure you want to delete %s?", human.getName()));
+        Optional<ButtonType> option = alert.showAndWait();
+        if (option.get() == ButtonType.OK){
+            humanModel.delete(human.id);
         }
+    }
+
+    public void onSaveToFileClick(ActionEvent actionEvent) {
+        humanModel.saveToFile("data.json");
+    }
+
+    public void onLoadFromFileClick(ActionEvent actionEvent) {
+        humanModel.loadFromFile("data.json");
     }
 }

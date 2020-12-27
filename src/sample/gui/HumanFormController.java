@@ -11,9 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import sample.models.Employee;
-import sample.models.Human;
-import sample.models.Student;
+import sample.models.*;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -29,14 +27,22 @@ public class HumanFormController implements Initializable {
 
     final String HUMAN_STUDENT = "Student";
     final String HUMAN_EMPLOYEE = "Employee";
+    final String HUMAN_TEACHER = "Teacher";
+    public ChoiceBox isOnVacationCmb;
+    public ChoiceBox educationCmb;
+    public Label isOnVacationLabel;
+    public Label educationLabel;
+    public HumanModel humanModel;
 
+    private Integer id = null;
     private Boolean modalResult = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         humanTypeCmb.setItems(FXCollections.observableArrayList(
                 HUMAN_STUDENT,
-                HUMAN_EMPLOYEE
+                HUMAN_EMPLOYEE,
+                HUMAN_TEACHER
         ));
 
         courseCmb.setItems(FXCollections.observableArrayList(
@@ -45,6 +51,15 @@ public class HumanFormController implements Initializable {
                 3,
                 4
         ));
+        isOnVacationCmb.setItems(FXCollections.observableArrayList(
+                true,
+                false
+        ));
+        educationCmb.getItems().setAll(
+                Employee.Education.School,
+                Employee.Education.University,
+                Employee.Education.No
+        );
         courseLabel.setVisible(false);
         courseCmb.setVisible(false);
         humanTypeCmb.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
@@ -62,10 +77,16 @@ public class HumanFormController implements Initializable {
     }
 
     public void onSaveClick(ActionEvent actionEvent) {
-        if (isInputValid()){
-            this.modalResult = true;
-            ((Stage)((Node)actionEvent.getSource()).getScene().getWindow()).close();
+        if (this.id != null){
+            Human human = getHuman();
+            human.id = this.id;
+            this.humanModel.edit(human);
+        }else {
+            if (isInputValid()){
+                this.humanModel.add(getHuman());
+            }
         }
+        ((Stage)((Node)actionEvent.getSource()).getScene().getWindow()).close();
     }
 
     private boolean isInputValid(){
@@ -124,12 +145,7 @@ public class HumanFormController implements Initializable {
     }
 
     public void onCancelClick(ActionEvent actionEvent) {
-        this.modalResult = false;
         ((Stage)((Node)actionEvent.getSource()).getScene().getWindow()).close();
-    }
-
-    public Boolean getModalResult() {
-        return modalResult;
     }
 
     public Human getHuman(){
@@ -144,7 +160,10 @@ public class HumanFormController implements Initializable {
                 result = new Student(name,age,money,course);
                 break;
             case HUMAN_EMPLOYEE:
-                result = new Employee(name,age,money);
+                result = new Employee(name,age,money,(Employee.Education)this.educationCmb.getValue());
+                break;
+            case HUMAN_TEACHER:
+                result = new Teacher(name,age,money,(Employee.Education)this.educationCmb.getValue(),(Boolean)this.isOnVacationCmb.getValue());
                 break;
         }
         return result;
@@ -152,6 +171,7 @@ public class HumanFormController implements Initializable {
 
     public void setHuman(Human human){
         this.humanTypeCmb.setDisable(human != null);
+        this.id = human != null ? human.id : null;
         if (human != null){
             this.nameTxtField.setText(human.getName());
             this.ageTxtField.setText(String.valueOf(human.getAge()));
@@ -162,6 +182,15 @@ public class HumanFormController implements Initializable {
             }
             if (human instanceof Employee){
                 this.humanTypeCmb.setValue(HUMAN_EMPLOYEE);
+                this.educationCmb.setValue(((Employee) human).getEducation());
+                this.isOnVacationCmb.setVisible(false);
+                this.isOnVacationLabel.setVisible(false);
+            }
+            if (human instanceof Teacher){
+                this.humanTypeCmb.setValue(HUMAN_TEACHER);
+                this.isOnVacationCmb.setValue(((Teacher) human).getIsOnVacation());
+                this.isOnVacationCmb.setVisible(true);
+                this.isOnVacationLabel.setVisible(true);
             }
         }
     }
